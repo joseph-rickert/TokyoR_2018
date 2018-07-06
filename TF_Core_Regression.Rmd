@@ -1,0 +1,103 @@
+---
+title: TensorFlow Mutliple Regression
+author: Joseph Rickert
+output: html_notebook
+---
+
+This notebook, which illustrates how a multiple linear regression (Y ~ XW + b) might be fit using TensorFlow was adapted from and example provided by [aymericdamien](https://github.com/aymericdamien/TensorFlow-Examples/blob/master/examples/2_BasicModels/linear_regression.py). The original version of this R example is [here](https://tensorflow.rstudio.com/tensorflow/articles/examples/linear_regression_multiple.html).
+
+```{r}
+library(tensorflow)
+```
+
+We begin by defining placeholders `X` and `Y` for input data and output data. Since we intend to fit a regression model using 3 predictors the input matrix `X` will have three columns.   
+
+```{r}
+p <- 3L
+X <- tf$placeholder("float", shape = shape(NULL, p), name = "x-data")
+Y <- tf$placeholder("float", name = "y-data")
+```   
+Note that we are working very close to the Python code here. `tf$placeholder()` is the R function that wraps the TensorFLow Python [`tf.placeholder()` function](https://www.tensorflow.org/api_docs/python/tf/placeholder).
+
+```
+placeholder(
+    dtype,
+    shape=None,
+    name=None
+)
+```
+
+```{r}
+tf$placeholder
+```
+
+Next, we define the weights for each column in `X`. Since there are 3 predictors, our 'W' matrix of coefficients will have 3 elements. We use a 3 x 1 matrix here, rather than a vector, to ensure TensorFlow understands how to perform matrix multiplication on `W` and `X`.   
+
+```{r}
+W <- tf$Variable(tf$zeros(list(p, 1L)))
+b <- tf$Variable(tf$zeros(list(1L)))
+```   
+
+Define the model (how estimates of 'Y' are produced)
+
+```{r}
+Y_hat <- tf$add(tf$matmul(X, W), b)
+```  
+
+Define the loss function that will minimize the mean-squared error.
+
+```{r}
+loss <- tf$reduce_mean(tf$square(Y_hat - Y))
+```  
+
+
+Define the mechanism used to optimize the loss function. Although normally we'd just use ordinary least squares, we'll instead use a gradient descent optimizer (since, in a more typical learning situation, we won't have an easy mechanism for directly computing the values of coefficients)
+
+```{r}
+generator <- tf$train$GradientDescentOptimizer(learning_rate = 0.01)
+optimizer <- generator$minimize(loss)
+```   
+
+Initialize a TensorFlow session for our regression.
+
+```{r}
+init <- tf$global_variables_initializer()
+session <- tf$Session()
+session$run(init)   
+```  
+
+
+Generate some data. The **true** model will be **y = 2x + 1** that is, the 'slope' parameter is 2, and the intercept is 1. Hence, The y will only be associated with the first variable regressor, the other two are just noise.
+
+```{r}
+set.seed(123)
+n <- 250
+x <- matrix(runif(p * n), nrow = n)
+y <- matrix(2 * x[, 1] + 1 + (rnorm(n, sd = 0.25)))
+```   
+
+
+Next, we repeatedly run optimizer until the loss is no longer changing.
+
+```{r}
+feed_dict <- dict(X = x, Y = y)
+epsilon <- .Machine$double.eps
+last_loss <- Inf
+while (TRUE) {
+  session$run(optimizer, feed_dict = feed_dict)
+  current_loss <- session$run(loss, feed_dict = feed_dict)
+  if (last_loss - current_loss < epsilon) break
+  last_loss <- current_loss
+}
+```   
+
+Here, we generate an R model so we can compare its coefficients with those of our gradient descent model and print out the results.
+
+```{r}
+r_model <- lm(y ~ x)
+
+tf_coef <- c(session$run(b), session$run(W))
+r_coef  <- r_model$coefficients
+
+print(rbind(tf_coef, r_coef))
+```  
