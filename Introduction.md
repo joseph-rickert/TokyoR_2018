@@ -1,4 +1,4 @@
-Introduction to Working with Keras and TensorFlow from R
+Introduction to Working with TensorFlow from R
 ========================================================
 author: Joseph B. Rickert
 date: 07/15/18
@@ -7,25 +7,30 @@ autosize: true
 All materials are available at:
 https://github.com/joseph-rickert/TokyoR_2018
 
-Inspiration
+What is TensorFlow?
 ========================================================
+* A platform for enterprise-level data science applications 
+* Associated with Deep Learning Neural Nets
+* But is much more!!!
+* TensorFlow is a machine-independent framework for running high-performance, parallel and distributed algorithms.
+* Runs on CPUs, GPUs and other hardware
 
 
-* TensorFlow have emerged as the leading platforms for enterprise level, machine learning applications. 
-* Therefore, it ought to be easy to access these platforms from R
-
-
-TensorFlow
+How does TensorFlow work?
 =========================================================
 
-- An open-source library for machine intelligence
-- Associated with Deep Learning
-- Is a general purpose library for numerical computation 
-- Uses data flow graphs.
-- Nodes in a `TensorFlow` graph represent mathematical operations
-- Data organized as multidimensional data arrays (tensors) that flow along the edges. 
-- Edges may also indicate control signals that constrain the order of execution.
+* TensorFlow implements a data flow programming language
+* Based on quite a bit of theory and a mathematically defined semantics with provable results (See the TLA+ Language specifying semantics of data flow languages.)
+*  Nodes in a TensorFlow graph represent mathematical operations
+* Data is organized as multidimensional data arrays (tensors) that flow along the edges of the graph 
+* Edges may also indicate control signals that constrain the order of execution.
 
+
+TensorFlow Graph
+========================================================
+
+Dataflow graph of a simple Bayesian Model
+<img src="greta-flow-graph.png" height = "500" width="1000">
 
 TensorFlow Paper
 ========================================================
@@ -33,31 +38,54 @@ This [paper](https://dl.acm.org/citation.cfm?doid=3088525.3088527) from the Goog
 
 ![](TF_paper.png)
 
-
-TensorFlow Graph
+Agenda
 ========================================================
-![](TF_graph.png)
+In this talk, I will:
+* Describe the basic R interfaces to TensorFlow
+* Show a Deep Learning example (keras API)
+* Show a Linear Classifier (tfestimators API)
+* Show a Regression example (Core API)
 
 
-R Interfaces to TensorFlow
+First R Interface to TensorFlow
 ========================================================
-- Keras API: A high-level interface to neural networks
-- Estimators API: A high-level interface to common models including regression and classifiers
-- Core API: A low-level interface that provides full access to the TensorFlow computational Graph
+### Keras API 
+* [Keras](https://keras.io/) is a high-level interface to neural networks 
+* Written in Python
+* Allows same code to run on CPUs or GPUs
+* Supports convolutional networks (computer vision) & recurrent networks (sequence processing)
+* Runs on top of [TensorFlow](https://github.com/tensorflow/tensorflow), [CNTK](https://github.com/Microsoft/cntk), and [Theano](https://github.com/Theano/Theano)
+* Accessed through the [`keras`](https://CRAN.R-project.org/package=keras) R package
 
-Note that these interfaces depend on R's `reticulate` package: 
-- When calling into Python, R data types are automatically converted to their equivalent Python types 
-- When values are returned to from Python, they are converted back to R types
+Second R Interface to TensorFlow
+========================================================
+### Estimators API   
+* [Estimators](https://www.tensorflow.org/programmers_guide/estimators) is high-level TensorFlow API
+* Written in Python
+* Accessed through the [tfestimators](https://tensorflow.rstudio.com/tfestimators/) R package  
+* Includes canned models and a framework for building new models.
 
+![](tfestimators.png)
 
-
-R Interface to Keras
+Canned tfestimators Models
 =========================================================
-Package [keras](https://CRAN.R-project.org/package=keras) provides an interface to [keras](https://keras.io/) the `Python` Deep Learning API.
+- `linear_regressor()`
+- `linear_classifier()`
+- `dnn_regressor()`
+- `dnn_classifier()`
+- `dnn_linear_combined_regresssor()`
+- `dnn_linear_combined_classifier()`
 
-- Supports both convolutional and recurrent neural networks
-- Allows same code to run on CPUs or GPUs
-- Runs on top of [TensorFlow](https://github.com/tensorflow/tensorflow), [CNTK](https://github.com/Microsoft/cntk), and [Theano](https://github.com/Theano/Theano)
+Third R Interface to TensorFlow
+========================================================
+### Core API
+* [The core API](https://www.tensorflow.org/api_docs/python/) is a set of Python modules that enable constructing and executing TensorFlow graphs. 
+* Accessed through The [`tensorflow`](https://cran.r-project.org/package=tensorflow) package.
+
+Note that all three interfaces depend on R's `reticulate` package: 
+* When calling into Python, R data types are automatically converted to their equivalent Python types 
+* When values are returned to from Python, they are converted back to R types
+
 
 Installing Keras
 =========================================================
@@ -73,55 +101,13 @@ install_keras()
 ```
 
 
-
-The R Interface to Estimators
-========================================================  
-Package [tfestimators](https://tensorflow.rstudio.com/tfestimators/):   
-- R interface to [Estimators](https://www.tensorflow.org/programmers_guide/estimators) high-level TensorFlow API
-- Includes canned models and a framework for building new models.
-
-![](tfestimators.png)
-
-Canned tfestimators Models
-=========================================================
-- `linear_regressor()`
-- `linear_classifier()`
-- `dnn_regressor()`
-- `dnn_classifier()`
-- `dnn_linear_combined_regresssor()`
-- `dnn_linear_combined_classifier()`
-
-More [models](https://tensorflow.rstudio.com/tfestimators/reference/) are coming soon including state saving recurrent neural networks, dynamic recurrent neural networks, support vector machines, random forest, KMeans clustering, etc.
-
-Installing tfestimators
-==========================================================
-Currently, the `tfestimators`package may be installed from GitHub.    
-
-
-```r
-devtools::install_github("rstudio/tfestimators")
-```
-
-If you haven't already installed `TensorFlow` you can do it with the command:
-
-```r
-install_tensorflow(version = "1.3.0")
-```
-
-The TensorFlow Core API
-==========================================================
-The [core API](https://www.tensorflow.org/api_docs/python/):
-- A set of Python modules
-- Enables constructing and executing TensorFlow graphs. 
-- The `tensorflow` package provides access to the complete TensorFlow API from within R.
-
 Installing the tensorflow package
 ===========================================================
-To get started, install the tensorflow R package from GitHub.
+To get started, install the tensorflow R package.
 
 
 ```r
-devtools::install_github("rstudio/tensorflow")
+install.packages("tensorflow")
 ```
 Then, use the function `tensorflow::install_tensorflow()` to install TensorFlow:
 
